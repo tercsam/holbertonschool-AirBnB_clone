@@ -1,10 +1,10 @@
 #!/usr/bin/python3
 """Module for File Storage unittests."""
+import os
 import json
 import unittest
 
 from models import storage
-from datetime import datetime
 from models.base_model import BaseModel
 from models.engine.file_storage import FileStorage
 
@@ -48,12 +48,19 @@ class TestFileStorage(unittest.TestCase):
 
     def test_reload(self):
         """Test reload()"""
-        try:
-            file_storage = FileStorage()
-            file_storage.reload()
-            self.assertTrue(True)
-        except:
-            self.assertTrue(False)
+        self.assertTrue(os.path.exists("file.json"))
+        my_model = BaseModel()
+        file_storage = FileStorage()
+        file_storage.new(self.model)
+        file_storage.save()
+        file_storage.reload()
+        with open("file.json", 'r') as file:
+            self.assertIn("BaseModel." + my_model.id, json.load(file))
+
+        file_storage.save()
+        file_storage._FileStorage__objects = {}
+        file_storage.reload()
+        self.assertNotEqual(self.storage.all(), {})
 
 
 if __name__ == "__main__":
