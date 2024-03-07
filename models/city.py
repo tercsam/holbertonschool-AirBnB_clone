@@ -3,6 +3,6 @@
 from models.base_model import BaseModel
 
 
-class city: 
+class city(BaseModel): 
     state_id = str()
     name = str()

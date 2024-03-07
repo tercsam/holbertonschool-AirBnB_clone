@@ -3,5 +3,5 @@
 from models.base_model import BaseModel
 
 
-class amenity: 
+class amenity(BaseModel): 
     name = str()
