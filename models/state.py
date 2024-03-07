@@ -1,7 +1,9 @@
 #!/usr/bin/python3
-"""This module defines the 'state class'"""
+"""Module that defines State class, inherits from BaseModel."""
+
 from models.base_model import BaseModel
 
 
-class state(BaseModel): 
-    name = str()
+class State(BaseModel):
+    """State class initialization."""
+    name = ""

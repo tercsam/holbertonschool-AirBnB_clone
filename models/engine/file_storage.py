@@ -2,13 +2,14 @@
 """This module defines the FileStorage class"""
 
 import json
+import os
 
 
 class FileStorage():
     """This class serializes and deserializes 'JSON' files"""
 
-    __file_path = 'file.json'
-    __objects = dict()
+    __file_path = "file.json"
+    __objects = {}
 
     def all(self):
         """Returns all objects."""
@@ -16,29 +17,51 @@ class FileStorage():
 
     def new(self, obj):
         """Set in '__objects' the 'obj' with key <obj class name>.id"""
-        key = ("{}.{}".format(type(obj).__name__, obj.id))
+        key = "{}.{}".format(type(obj).__name__, obj.id)
         self.__objects[key] = obj
 
     def save(self):
         """serialize '__objects' to the 'JSON' file"""
 
-        jason_dico = dict()
+        json_dict = {}
 
         for key, value in self.__objects.items():
-            jason_dico[key] = value.to_dict()
+            json_dict[key] = value.to_dict()
         with open(self.__file_path, 'w') as f:
-            json.dump(jason_dico, f)
+            json.dump(json_dict, f)
 
     def reload(self):
-        """Deserialize the 'JSON' file to '__objects'"""
-        from models.base_model import BaseModel
+        """
+        Deserializes the JSON file and restores objects.
+        """
+        from models import base_model
+        from models import user
+        from models import state
+        from models import city
+        from models import amenity
+        from models import place
+        from models import review
 
-        try:
-            with open(self.__file_path, 'r') as f:
-                objects = json.load(f)
-            for key, value in objects.items():
-                class_name = value.pop('__class__', None)
-                if class_name == 'BaseModel':
-                    self.__objects[key] = BaseModel(**value)
-        except FileNotFoundError:
-            pass
+        dict_module = {
+            'BaseModel': base_model,
+            'User': user,
+            'State': state,
+            'City': city,
+            'Amenity': amenity,
+            'Place': place,
+            'Review': review
+            }
+
+        if os.path.exists(FileStorage.__file_path):
+            with open(FileStorage.__file_path, "r") as file:
+                obj_stored = json.load(file)
+
+            for key, value in obj_stored.items():
+                class_name = value["__class__"]
+
+                if class_name in dict_module:
+                    model_module = dict_module[class_name]
+                    model_class = getattr(model_module, class_name)
+
+                obj_instance = model_class(**value)
+                self.__objects[key] = obj_instance
