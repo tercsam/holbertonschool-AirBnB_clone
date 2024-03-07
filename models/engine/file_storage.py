@@ -1,70 +1,44 @@
 #!/usr/bin/python3
-"""File storage class."""
-import os
+"""This module defines the FileStorage class"""
+
 import json
 
 
-class FileStorage:
-    """File storage class."""
+class FileStorage():
+    """This class serializes and deserializes 'JSON' files"""
+
     __file_path = 'file.json'
-    __objects = {}
+    __objects = dict()
 
     def all(self):
-        """all method
-        Returns:
-            [dict]: __objects"""
-        return FileStorage.__objects
+        """Returns all objects."""
+        return self.__objects
 
     def new(self, obj):
-        """new method"""
-        key = f"{type(obj).__name__}.{obj.id}"
-        FileStorage.__objects[key] = obj
+        """Set in '__objects' the 'obj' with key <obj class name>.id"""
+        key = ("{}.{}".format(type(obj).__name__, obj.id))
+        self.__objects[key] = obj
 
     def save(self):
-        """save method"""
-        obj = {}
-        for key, value in FileStorage.__objects.items():
-            obj[key] = value.to_dict()
+        """serialize '__objects' to the 'JSON' file"""
+
+        jason_dico = dict()
+
+        for key, value in self.__objects.items():
+            jason_dico[key] = value.to_dict()
         with open(self.__file_path, 'w') as f:
-            json.dump(obj, f)
+            json.dump(jason_dico, f)
 
     def reload(self):
-        """reload method"""
-    import models.user as user_module
-    import models.city as city_module
-    import models.state as state_module
-    import models.place as place_module
-    import models.review as review_module
-    import models.amenity as amenity_module
-    import models.base_model as base_model_module
+        """Deserialize the 'JSON' file to '__objects'"""
+        from models.base_model import BaseModel
 
-    dict_module = {'BaseModel': base_model_module, 'User': user_module,
-                   'State': state_module, 'Place': place_module,
-                   'City': city_module, 'Amenity': amenity_module,
-                   'Review': review_module}
-
-    if os.path.exists(FileStorage.__file_path):
-        with open(FileStorage.__file_path, 'r') as f:
-            loaded_objects = json.load(f)
-            for key, value in loaded_objects.items():
-                class_name = value['__class__']
-                if class_name in dict_module:
-                    model_module = dict_module[class_name]
-                    model_class = getattr(model_module, class_name)
-                FileStorage.__objects[key] = model_class(**value)
-
-
-        dict_module = {'BaseModel': base_model, 'User': user,
-                       'State': state, 'Place': place,
-                       'City': city, 'Amenity': amenity,
-                       'Review': review}
-
-        if os.path.exists(FileStorage.__file_path):
-            with open(FileStorage.__file_path, 'r') as f:
-                loard_objects = json.load(f)
-                for key, value in loard_objects.items():
-                    class_name = value['__class__']
-                    if class_name in dict_module:
-                        model_module = dict_module[class_name]
-                        model_class = getattr(model_module, class_name)
-                    FileStorage.__objects[key] = model_class(**value)
+        try:
+            with open(self.__file_path, 'r') as f:
+                objects = json.load(f)
+            for key, value in objects.items():
+                class_name = value.pop('__class__', None)
+                if class_name == 'BaseModel':
+                    self.__objects[key] = BaseModel(**value)
+        except FileNotFoundError:
+            pass
