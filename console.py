@@ -14,7 +14,8 @@ from models.review import Review
 class HBNBCommand(cmd.Cmd):
     """Command interpreter class."""
     prompt = "(hbnb) "
-    list_module = ['BaseModel', 'User', 'State', 'City', 'Amenity', 'Place', 'Review']
+    list_module = ['BaseModel', 'User', 'State',
+                   'City', 'Amenity', 'Place', 'Review']
 
     def do_create(self, arg):
         """Create new instance of BaseModel.
